@@ -33,6 +33,10 @@ class AbsorbWidget(QMainWindow):
         self.quit_action.setShortcut("Ctrl+Q")
         self.quit_action.triggered.connect(self.close)
 
+        self.file_menu = self.menuBar().addMenu("File")
+        self.file_menu.addAction(self.open_action)
+        self.file_menu.addAction(self.quit_action)
+
         self.dialog = absorb_pdf_dialog_widget.AbsorbPdfDialogWidget()
         self.open_action.triggered.connect(self.launch_browser)
 
