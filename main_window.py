@@ -2,20 +2,28 @@
 import os
 import sys
 
-from PySide6.QtCore import QUrl, Qt, QSize, Slot, QStandardPaths, QSettings, QDir
-from PySide6.QtGui import QAction, QKeyEvent, QWheelEvent, QPixmap, QScreen, QCloseEvent
+from PySide6.QtCore import QStandardPaths, Qt, QUrl
+from PySide6.QtGui import QAction, QCloseEvent, QPixmap
 from PySide6.QtPdf import QPdfDocument
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QListView, QListWidget, QWidget, QHBoxLayout, \
-    QFileDialog, QDialog
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QHBoxLayout,
+    QMainWindow,
+    QWidget,
+)
 
 import absorb_pdf_dialog_widget
 import absorb_pdf_view_widget
 import constants
+
+# pylint: disable=unused-import
 import images.window_app_icon
-from absorb_pdf_dialog_widget import AbsorbPdfDialogWidget
 
 
 class AbsorbWidget(QMainWindow):
+    """This is main class to launch PDF viewer."""
+
     def __init__(self, parent=None) -> None:
         super().__init__()
 
@@ -25,12 +33,7 @@ class AbsorbWidget(QMainWindow):
         self.quit_action.setShortcut("Ctrl+Q")
         self.quit_action.triggered.connect(self.close)
 
-        self.file_menu = self.menuBar().addMenu("File")
-        self.about_menu = self.menuBar().addMenu("About")
-        self.file_menu.addAction(self.open_action)
-        self.file_menu.addAction(self.quit_action)
-
-        self.dialog = AbsorbPdfDialogWidget()
+        self.dialog = absorb_pdf_dialog_widget.AbsorbPdfDialogWidget()
         self.open_action.triggered.connect(self.launch_browser)
 
         self.pdf_document = QPdfDocument()
@@ -48,18 +51,28 @@ class AbsorbWidget(QMainWindow):
 
         self.show()
 
-    def launch_browser(self):
-        documents_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation)
-        default_path = self.dialog.settings.value(constants.DIALOG_LAST_DIRECTORY, documents_path)
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open PDF File", default_path, "PDF Files (*.pdf)")
+    def launch_browser(self) -> None:
+        """This function launches the pdf selection dialog box.
+        The last selected file path is set in the QSettings."""
+
+        documents_path = QStandardPaths.writableLocation(
+            QStandardPaths.StandardLocation.DocumentsLocation
+        )
+        default_path = self.dialog.settings.value(
+            constants.DIALOG_LAST_DIRECTORY, documents_path
+        )
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Open PDF File", str(default_path), "PDF Files (*.pdf)"
+        )
         if file_path:
-            # Load the selected PDF file
             self.pdf_document.load(QUrl.fromLocalFile(file_path).toLocalFile())
+            self.dialog.settings.setValue(
+                constants.DIALOG_LAST_DIRECTORY, os.path.dirname(file_path)
+            )
 
-            # Save the directory of the opened file to settings
-            self.dialog.settings.setValue(constants.DIALOG_LAST_DIRECTORY, os.path.dirname(file_path))
-
+    # pylint: disable=invalid-name
     def closeEvent(self, event: QCloseEvent) -> None:
+        """This function overrides the PySide event for closing window."""
         event.accept()
 
 

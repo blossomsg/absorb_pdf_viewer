@@ -9,7 +9,7 @@ import constants
 
 
 class AbsorbPdfDialogWidget(QFileDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__()
 
         self.settings = QSettings("Tectonic Shift Studios", "Absorb PDF")
