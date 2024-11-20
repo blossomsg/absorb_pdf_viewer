@@ -1,3 +1,5 @@
+from typing import Any
+
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QWheelEvent, QMouseEvent
 from PySide6.QtPdf import QPdfDocument, QPdfSearchModel
@@ -5,11 +7,10 @@ from PySide6.QtPdfWidgets import QPdfView
 
 
 class AbsorbPdfViewWidget(QPdfView):
-    def __init__(self, pdf_document: QPdfDocument, parent=None) -> None:
+    def __init__(self, parent: Any =None) -> None:
         super().__init__()
 
         self.setPageMode(self.PageMode.MultiPage)
-        self.setDocument(pdf_document)
 
         # Track middle mouse state and initial press position
         self.middle_mouse_pressed = False

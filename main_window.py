@@ -1,19 +1,15 @@
 """Modules for UI"""
 import os
 import sys
+from typing import Any
 
 from PySide6.QtCore import QStandardPaths, Qt, QUrl
 from PySide6.QtGui import QAction, QCloseEvent, QPixmap
 from PySide6.QtPdf import QPdfDocument
-from PySide6.QtWidgets import (
-    QApplication,
-    QFileDialog,
-    QHBoxLayout,
-    QMainWindow,
-    QWidget,
-)
+from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
 
 import absorb_pdf_dialog_widget
+import absorb_pdf_tab_widget
 import absorb_pdf_view_widget
 import constants
 
@@ -24,7 +20,8 @@ import images.window_app_icon
 class AbsorbWidget(QMainWindow):
     """This is main class to launch PDF viewer."""
 
-    def __init__(self, parent=None) -> None:
+    # pylint: disable=unused-argument
+    def __init__(self, parent: Any = None) -> None:
         super().__init__()
 
         self.open_action = QAction("Open")
@@ -40,20 +37,13 @@ class AbsorbWidget(QMainWindow):
         self.dialog = absorb_pdf_dialog_widget.AbsorbPdfDialogWidget()
         self.open_action.triggered.connect(self.launch_browser)
 
-        self.pdf_document = QPdfDocument()
-        self.pdf_view = absorb_pdf_view_widget.AbsorbPdfViewWidget(self.pdf_document)
+        self.tab = absorb_pdf_tab_widget.AbsorbPdfTabWidget()
 
-        self.pdf_widget = QWidget()
-        self.pdf_horizontal_layout = QHBoxLayout(self.pdf_widget)
-
-        self.pdf_horizontal_layout.addWidget(self.pdf_view)
-        self.setCentralWidget(self.pdf_widget)
+        self.setCentralWidget(self.tab)
 
         self.setWindowTitle("Absorb PDF Viewer")
         self.setWindowIcon(QPixmap(":/windowAppPrefix/window_app_icon.ico"))
         self.setWindowState(Qt.WindowState.WindowMaximized)
-
-        self.show()
 
     def launch_browser(self) -> None:
         """This function launches the pdf selection dialog box.
@@ -69,7 +59,11 @@ class AbsorbWidget(QMainWindow):
             self, "Open PDF File", str(default_path), "PDF Files (*.pdf)"
         )
         if file_path:
-            self.pdf_document.load(QUrl.fromLocalFile(file_path).toLocalFile())
+            pdf_view = absorb_pdf_view_widget.AbsorbPdfViewWidget()
+            pdf_document = QPdfDocument(pdf_view)
+            pdf_view.setDocument(pdf_document)
+            self.tab.create_tab(pdf_view, os.path.basename(file_path))
+            pdf_document.load(QUrl.fromLocalFile(file_path).toLocalFile())
             self.dialog.settings.setValue(
                 constants.DIALOG_LAST_DIRECTORY, os.path.dirname(file_path)
             )
@@ -83,4 +77,5 @@ class AbsorbWidget(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = AbsorbWidget()
+    window.show()
     sys.exit(app.exec())

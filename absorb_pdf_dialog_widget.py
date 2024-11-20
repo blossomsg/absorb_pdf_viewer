@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Any
 
 from PySide6.QtCore import QSettings, QStandardPaths
 from PySide6.QtGui import QCloseEvent
@@ -9,7 +10,7 @@ import constants
 
 
 class AbsorbPdfDialogWidget(QFileDialog):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__()
 
         self.settings = QSettings("Tectonic Shift Studios", "Absorb PDF")
